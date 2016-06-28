@@ -1,6 +1,7 @@
 const config = require('./config'),
     request = require('request')
-schedule = require('node-schedule');
+schedule = require('node-schedule'),
+    jsonfile = require('jsonfile');
 
 const getRefreshToken = (cb) => {
     const options = {
@@ -18,8 +19,9 @@ const getRefreshToken = (cb) => {
     });
 }
 
-//'0 0 2 * * 1'
-const scheduled = schedule.scheduleJob('10 * * * * *', () => {
+jsonfile.writeFileSync('test.json', { test: 'world' });
+
+const scheduled = schedule.scheduleJob('0 0 2 * * 1', () => {
     getRefreshToken((error, response, body) => {
         const accessToken = body.access_token,
             options = {
@@ -29,6 +31,9 @@ const scheduled = schedule.scheduleJob('10 * * * * *', () => {
                 },
                 json: true
             };
+        if (body.refresh_token) {
+            jsonfile.writeFileSync('config.json', { refresh_token: body.refresh_token });
+        }
         request.get(options, (error, response, body) => {
             const discoverTracks = body.items.map((item) => item.track.uri).join(','),
                 archiveOptions = {
