@@ -1,0 +1,11 @@
+{
+  "name": "spotify-discover-archiver",
+  "version": "1.0.0",
+  "main": "spotify.js",
+  "author": "Justin Peck",
+  "license": "ISC",
+  "dependencies": {
+    "node-schedule": "^1.1.1",
+    "request": "^2.72.0"
+  }
+}
