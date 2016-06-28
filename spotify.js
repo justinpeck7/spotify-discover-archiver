@@ -1,6 +1,6 @@
 const config = require('./config'),
-    request = require('request')
-schedule = require('node-schedule'),
+    request = require('request'),
+    schedule = require('node-schedule'),
     jsonfile = require('jsonfile');
 
 const getRefreshToken = (cb) => {
@@ -19,8 +19,6 @@ const getRefreshToken = (cb) => {
     });
 }
 
-jsonfile.writeFileSync('test.json', { test: 'world' });
-
 const scheduled = schedule.scheduleJob('0 0 2 * * 1', () => {
     getRefreshToken((error, response, body) => {
         const accessToken = body.access_token,
@@ -31,9 +29,11 @@ const scheduled = schedule.scheduleJob('0 0 2 * * 1', () => {
                 },
                 json: true
             };
+
         if (body.refresh_token) {
             jsonfile.writeFileSync('config.json', { refresh_token: body.refresh_token });
         }
+
         request.get(options, (error, response, body) => {
             const discoverTracks = body.items.map((item) => item.track.uri).join(','),
                 archiveOptions = {
@@ -46,6 +46,7 @@ const scheduled = schedule.scheduleJob('0 0 2 * * 1', () => {
                     },
                     json: true
                 };
+                
             request.post(archiveOptions, (error, response, body) => {
                 if (body.snapshot_id) {
                     console.log(`Tracks added for: ${new Date()}`);
