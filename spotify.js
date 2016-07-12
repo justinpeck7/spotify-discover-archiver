@@ -1,7 +1,9 @@
 const config = require('./config'),
     request = require('request'),
     schedule = require('node-schedule'),
-    jsonfile = require('jsonfile');
+    jsonfile = require('jsonfile'),
+    fs = require('fs'),
+    logStream = fs.createWriteStream('log.txt');
 
 const getRefreshToken = (cb) => {
     const options = {
@@ -20,6 +22,7 @@ const getRefreshToken = (cb) => {
 }
 
 const scheduled = schedule.scheduleJob('0 0 2 * * 1', () => {
+    logStream.write('Starting...\n');
     getRefreshToken((error, response, body) => {
         const accessToken = body.access_token,
             options = {
@@ -29,6 +32,7 @@ const scheduled = schedule.scheduleJob('0 0 2 * * 1', () => {
                 },
                 json: true
             };
+        logStream.write(`Refresh Token returned with access token: ${!!accessToken}\n`);
 
         if (body.refresh_token) {
             jsonfile.writeFileSync('config.json', { refresh_token: body.refresh_token });
@@ -46,15 +50,18 @@ const scheduled = schedule.scheduleJob('0 0 2 * * 1', () => {
                     },
                     json: true
                 };
+            
+            logStream.write(`Discover tracks returned: ${!!body.items.length}\n`);
                 
             request.post(archiveOptions, (error, response, body) => {
                 if (body.snapshot_id) {
-                    console.log(`Tracks added for: ${new Date()}`);
+                    logStream.write(`Tracks added for: ${new Date()}\n`);
                 }
                 else {
-                    console.log(body);
+                    logStream.write(`${body}\n`);
                 }
             });
         });
     });
 });
+
