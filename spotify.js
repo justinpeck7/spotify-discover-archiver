@@ -20,7 +20,7 @@ const getRefreshToken = (cb) => {
     });
 }
 
-const scheduled = schedule.scheduleJob('0 0 2 * * 1', () => {
+const scheduled = schedule.scheduleJob('0 0 9 * * 1', () => {
     logStream.write('Starting...\n');
     getRefreshToken((error, response, body) => {
         const accessToken = body.access_token,
