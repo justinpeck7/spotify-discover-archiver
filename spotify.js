@@ -1,6 +1,6 @@
 const config = require('./config'),
     request = require('request'),
-    schedule = require('node-schedule'),
+    Cron = require('cron').CronJob,
     jsonfile = require('jsonfile'),
     logStream = require('fs').createWriteStream(require('path').resolve(__dirname, 'log.txt'));
 
@@ -20,7 +20,7 @@ const getRefreshToken = (cb) => {
     });
 }
 
-const scheduled = schedule.scheduleJob('0 0 9 * * 1', () => {
+const update = () => {
     logStream.write('Starting...\n');
     getRefreshToken((error, response, body) => {
         const accessToken = body.access_token,
@@ -64,5 +64,7 @@ const scheduled = schedule.scheduleJob('0 0 9 * * 1', () => {
             });
         });
     });
-});
+}
+
+new Cron('0 0 10 * * 1', update, null, true);
 
